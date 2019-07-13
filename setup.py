@@ -4,28 +4,14 @@ import subprocess
 from distutils.core import setup, Command
 
 
-class TestCommand(Command):
-    user_options = []
-
-    def initialize_options(self):
-        pass
-
-    def finalize_options(self):
-        pass
-
-    def run(self):
-        ret = subprocess.call([sys.executable, 'tests.py', 'tests/unit'])
-        raise SystemExit(ret)
-
-
-setup(name='nixops',
+setup(name='nixops-hetzner',
       version='@version@',
-      description='NixOS cloud deployment tool',
-      url='https://github.com/NixOS/nixops',
-      author='Eelco Dolstra',
-      author_email='eelco.dolstra@logicblox.com',
-      scripts=['scripts/nixops'],
-      packages=['nixops', 'nixops.resources', 'nixops.backends'],
-      package_data={'nixops': ['data/nixos-infect']},
-      cmdclass={'test': TestCommand}
-      )
+      description='NixOS cloud deployment tool, but for hetzner',
+      url='https://github.com/NixOS/nixops-hetzner',
+      # TODO: add author
+      author='',
+      author_email='',
+      packages=[ 'nixopshetzner', 'nixopshetzner.backends'],
+      entry_points={'nixops': ['hetzner = nixopshetzner.plugin']},
+      py_modules=['plugin']
+)
