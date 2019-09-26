@@ -1,11 +1,14 @@
-{ nixopsSrc ? { outPath = ./.; revCount = 0; shortRev = "abcdef"; rev = "HEAD"; }
+{ src ? { outPath = ./.; revCount = 0; shortRev = "abcdef"; rev = "HEAD"; }
 , officialRelease ? false
 , nixpkgs ? <nixpkgs>
 }:
 
 let
-  pkgs = import nixpkgs { };
-  version = "1.7" + (if officialRelease then "" else "pre${toString nixopsSrc.revCount}_${nixopsSrc.shortRev}");
+  pkgs = import nixpkgs { system = "x86_64-linux"; };
+  version = "1.7" +
+            (if officialRelease then ""
+             else if src ? lastModified then "${builtins.substring 0 8 src.lastModified}.${src.shortRev}"
+             else "${toString src.revCount}_${src.shortRev}");
 in
 
 rec {
