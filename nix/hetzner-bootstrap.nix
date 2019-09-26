@@ -3,9 +3,7 @@ with import <nixpkgs> { system = "x86_64-linux"; };
 let
   pkgsNative = import <nixpkgs> {};
 
-  nixpart = python2Packages.nixpart0.override {
-    useNixUdev = false;
-  };
+  nixpart = python2Packages.nixpart0;
 
   generateConfig = (import <nixpkgs/nixos> {
     configuration = {};
