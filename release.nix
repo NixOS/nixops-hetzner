@@ -8,7 +8,7 @@ let
   version = "1.7" +
             (if officialRelease then ""
              else if src ? lastModified then "pre${builtins.substring 0 8 src.lastModified}.${src.shortRev}"
-             else "pre${toString src.revCount}_${src.shortRev}");
+             else "pre${toString (src.revCount or 0)}_${src.shortRev or "abcdef"}");
 in
 
 rec {
