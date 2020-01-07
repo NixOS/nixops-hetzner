@@ -190,6 +190,7 @@ class HetznerState(MachineState):
             # systems.
             self.log_start("waiting for rescue system...")
             dotlog = lambda: self.log_continue(".")  # NOQA
+            # FIXME: if the server is already up in rescue mode, this will hang forever.
             wait_for_tcp_port(ip, 22, open=False, callback=dotlog)
             self.log_continue("[down]")
             wait_for_tcp_port(ip, 22, callback=dotlog)
