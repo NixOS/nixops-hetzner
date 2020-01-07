@@ -73,7 +73,7 @@ with lib;
     };
 
     partitionCommand = mkOption {
-      type = types.lines;
+      type = types.nullOr types.lines;
       default = null;
       description = ''
         If set, a list of shell commands that perform the initial
