@@ -72,6 +72,25 @@ with lib;
       '';
     };
 
+    partitionCommand = mkOption {
+      type = types.lines;
+      default = null;
+      description = ''
+        If set, a list of shell commands that perform the initial
+        partitioning and formatting of the server. This is used instead of
+        <option>deployment.hetzner.partitions<option>.
+      '';
+    };
+
+    mountCommand = mkOption {
+      type = types.nullOr types.lines;
+      default = null;
+      description = ''
+        If not null, a list of shell commands that partition and
+        format the disks, used instead of <option>partitions<option>.
+      '';
+    };
+
     partitions = mkOption {
       default = ''
         clearpart --all --initlabel --drives=sda,sdb
@@ -92,7 +111,7 @@ with lib;
       '';
       type = types.lines;
       description = ''
-        Specify layout of partitions and file systems using Anacondas Kickstart
+        Specify layout of partitions and file systems using Anaconda's Kickstart
         format. For possible options and commands, please have a look at:
 
         <link xlink:href="http://fedoraproject.org/wiki/Anaconda/Kickstart"/>

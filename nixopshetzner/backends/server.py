@@ -57,7 +57,9 @@ class HetznerDefinition(MachineDefinition):
                  ("create_sub_account", "createSubAccount", "bool"),
                  ("robot_user", "robotUser", "string"),
                  ("robot_pass", "robotPass", "string"),
-                 ("partitions", "partitions", "string")]
+                 ("partitions", "partitions", "string"),
+                 ("partition_command", "partitionCommand", "string"),
+                 ("mount_command", "mountCommand", "string")]
         for var, name, valtype in attrs:
             node = x.find("attr[@name='" + name + "']/" + valtype)
             setattr(self, var, xml_expr_to_python(node))
@@ -223,7 +225,7 @@ class HetznerState(MachineState):
         self.run_command("cat >> /etc/motd", stdin_string=fullmsg)
         self.log_end("done.")
 
-    def _bootstrap_rescue(self, install, partitions):
+    def _bootstrap_rescue(self, install, partitions, partition_command, mount_command):
         """
         Bootstrap everything needed in order to get Nix and the partitioner
         usable in the rescue system. The keyword arguments are only for
@@ -287,13 +289,19 @@ class HetznerState(MachineState):
         if install:
             self.log_start("partitioning disks... ")
             try:
-                out = self.run_command("nixpart -p -", capture_stdout=True,
-                                       stdin_string=partitions)
+                if partition_command is None:
+                    out = self.run_command("nixpart -p -", capture_stdout=True,
+                                           stdin_string=partitions)
+                else:
+                    self.run_command("set -e; {}".format(partition_command))
+                    if mount_command is not None:
+                        self.run_command("set -e; {}".format(mount_command))
+                    out = "{}"
             except SSHCommandFailed as failed_command:
                 # Exit code 100 is when the partitioner requires a reboot.
                 if failed_command.exitcode == 100:
                     self.log(failed_command.message)
-                    self.reboot_rescue(install, partitions)
+                    self.reboot_rescue(install, partitions, partition_command, mount_command)
                     return
                 else:
                     raise
@@ -304,8 +312,15 @@ class HetznerState(MachineState):
             self.fs_info = out
         else:
             self.log_start("mounting filesystems... ")
-            self.run_command("nixpart -m -", stdin_string=self.partitions)
+            if mount_command is None:
+                self.run_command("nixpart -m -", stdin_string=self.partitions)
+            else:
+                self.run_command("set -e; {}".format(mount_command))
         self.log_end("done.")
+
+        res = self.run_command("mountpoint -q /mnt", check=False)
+        if res != 0:
+            raise Exception("/mnt is not mounted, cannot install!")
 
         if not install:
             self.log_start("checking if system in /mnt is NixOS... ")
@@ -337,7 +352,7 @@ class HetznerState(MachineState):
             MachineState.reboot(self, hard=hard)
 
     def reboot_rescue(self, install=False, partitions=None, bootstrap=True,
-                      hard=False):
+                      hard=False, partition_command=None, mount_command=None):
         """
         Use the Robot to activate the rescue system and reboot the system. By
         default, only mount partitions and do not partition or wipe anything.
@@ -352,6 +367,7 @@ class HetznerState(MachineState):
         server = self._get_server_by_ip(self.main_ipv4)
         server.rescue.activate()
         rescue_passwd = server.rescue.password
+        self.log("rescue password is '{0}'".format(rescue_passwd))
         if hard or (install and self.state not in (self.UP, self.RESCUE)):
             self.log_start("sending hard reset to robot... ")
             server.reboot('hard')
@@ -367,7 +383,7 @@ class HetznerState(MachineState):
         self.state = self.RESCUE
         self.ssh.reset()
         if bootstrap:
-            self._bootstrap_rescue(install, partitions)
+            self._bootstrap_rescue(install, partitions, partition_command, mount_command)
 
     def _install_base_system(self):
         self.log_start("creating missing directories... ")
@@ -634,7 +650,11 @@ class HetznerState(MachineState):
 
         if not self.vm_id:
             self.log("installing machine...")
-            self.reboot_rescue(install=True, partitions=defn.partitions)
+            self.reboot_rescue(
+                install=True,
+                partitions=defn.partitions,
+                partition_command=defn.partition_command,
+                mount_command=defn.mount_command)
             self._install_base_system()
             self._detect_hardware()
             server = self._get_server_by_ip(self.main_ipv4)
