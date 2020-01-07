@@ -232,6 +232,8 @@ class HetznerState(MachineState):
         """
         self.log_start("building Nix bootstrap installer... ")
         expr = os.path.realpath(os.path.dirname(__file__) + "../../../../../../share/nix/nixops-hetzner/hetzner-bootstrap.nix")
+        if not os.path.exists(expr):
+            expr = os.path.realpath(os.path.dirname(__file__) + "../../../nix/hetzner-bootstrap.nix")
         bootstrap_out = subprocess.check_output(["nix-build", expr,
                                                  "--no-out-link"]).rstrip()
         bootstrap = os.path.join(bootstrap_out, 'bin/hetzner-bootstrap')
