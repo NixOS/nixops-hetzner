@@ -269,18 +269,20 @@ class HetznerState(MachineState):
         # The command to retrieve our split TAR archive on the other side.
         recv = 'read -d: tarsize; head -c "$tarsize" | {0}; {0}'.format(tarcmd)
 
-        self.log_start("copying bootstrap files to rescue system... ")
-        tarstream = subprocess.Popen([bootstrap], stdout=subprocess.PIPE)
-        if not self.has_fast_connection:
-            stream = subprocess.Popen(["gzip", "-c"], stdin=tarstream.stdout,
+        if self.run_command("test -e /nix/bootstrap-copied", check=False) != 0:
+            self.log_start("copying bootstrap files to rescue system... ")
+            tarstream = subprocess.Popen([bootstrap], stdout=subprocess.PIPE)
+            if not self.has_fast_connection:
+                stream = subprocess.Popen(["gzip", "-c"], stdin=tarstream.stdout,
                                       stdout=subprocess.PIPE)
-            self.run_command("gzip -d | ({0})".format(recv),
+                self.run_command("gzip -d | ({0})".format(recv),
                              stdin=stream.stdout)
-            stream.wait()
-        else:
-            self.run_command(recv, stdin=tarstream.stdout)
-        tarstream.wait()
-        self.log_end("done.")
+                stream.wait()
+            else:
+                self.run_command(recv, stdin=tarstream.stdout)
+            tarstream.wait()
+            self.run_command("touch /nix/bootstrap-copied")
+            self.log_end("done.")
 
         if install:
             self.log_start("partitioning disks... ")
