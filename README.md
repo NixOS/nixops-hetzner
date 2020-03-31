@@ -18,7 +18,7 @@ This repo contains the NixOps Hetzner Plugin.
 To start developing on the NixOps Hetzner plugin, you can run:
 
 ```bash
-  $ ./dev-shell
+  $ nix-shell
 ```
 
 ## Building from source
