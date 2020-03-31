@@ -1,7 +1,6 @@
 #! /usr/bin/env python2
 import nose
 import sys
-import os
 
 if __name__ == "__main__":
     nose.main(
