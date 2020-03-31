@@ -12,6 +12,7 @@ nixops = { git = "https://github.com/adisbladis/nixops.git", rev = "poetry2nix-p
 hetzner = "0.8.2"
 
 [tool.poetry.dev-dependencies]
+nose = "^1"
 
 [tool.poetry.plugins."nixops"]
 nixopshetzner = "nixopshetzner.plugin"
