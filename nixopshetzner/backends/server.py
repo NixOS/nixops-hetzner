@@ -142,13 +142,13 @@ class HetznerState(MachineState):
             raise Exception(
                 "please either set ‘deployment.hetzner.robotUser’"
                 " or $HETZNER_ROBOT_USER for machine"
-                " ‘{0}’".format(self.name)
+                f" ‘{self.name}’"
             )
         elif robot_pass is None:
             raise Exception(
                 "please either set ‘deployment.hetzner.robotPass’"
                 " or $HETZNER_ROBOT_PASS for machine"
-                " ‘{0}’".format(self.name)
+                f" ‘{self.name}’"
             )
 
         return (robot_user, robot_pass)
@@ -240,17 +240,13 @@ class HetznerState(MachineState):
 
         self.log_start("adding note on ‘nixos-enter’ to motd... ")
         cmd = "nixos-enter"
-        msg = "Use {} to enter a shell on the target system"
-        msglen = len(msg.format(cmd))
-        csimsg = msg.format("\033[1;32m{}\033[37m".format(cmd))
+        msg = f"Use {cmd} to enter a shell on the target system"
+        msglen = len(msg)
+        csimsg = msg.format(f"\033[1;32m{cmd}\033[37m")
         hborder = "-" * (msglen + 2)
         fullmsg = "\033[1;30m{}\033[m\n\n".format(
             "\n".join(
-                [
-                    "+{}+".format(hborder),
-                    "| \033[37;1m{}\033[30m |".format(csimsg),
-                    "+{}+".format(hborder),
-                ]
+                [f"+{hborder}+", f"| \033[37;1m{csimsg}\033[30m |", f"+{hborder}+",]
             )
         )
         self.run_command("cat >> /etc/motd", stdin_string=fullmsg)
@@ -272,7 +268,7 @@ class HetznerState(MachineState):
             ["nix-build", expr, "--no-out-link"]
         ).rstrip()
         bootstrap = os.path.join(bootstrap_out, "bin/hetzner-bootstrap")
-        self.log_end("done. ({0})".format(bootstrap))
+        self.log_end(f"done. ({bootstrap})")
 
         self.log_start("creating nixbld group in rescue system... ")
         self.run_command(
@@ -285,10 +281,10 @@ class HetznerState(MachineState):
         df, bs = dfstat.split(":")
         free_mb = (int(df) * int(bs)) // 1024 // 1024
         if free_mb > 300:
-            self.log_end("yes: {0} MB".format(free_mb))
+            self.log_end(f"yes: {free_mb} MB")
             tarcmd = "tar x -C /"
         else:
-            self.log_end("no: {0} MB".format(free_mb))
+            self.log_end(f"no: {free_mb} MB")
             tarexcludes = [
                 "*/include",
                 "*/man",
@@ -318,11 +314,11 @@ class HetznerState(MachineState):
                 "*-boehm-gc-*/share",
             ]
             tarcmd = "tar x -C / " + " ".join(
-                ["--exclude='{0}'".format(glob) for glob in tarexcludes]
+                [f"--exclude='{glob}'" for glob in tarexcludes]
             )
 
         # The command to retrieve our split TAR archive on the other side.
-        recv = 'read -d: tarsize; head -c "$tarsize" | {0}; {0}'.format(tarcmd)
+        recv = f'read -d: tarsize; head -c "$tarsize" | {tarcmd}; {tarcmd}'
 
         self.log_start("copying bootstrap files to rescue system... ")
         tarstream = subprocess.Popen([bootstrap], stdout=subprocess.PIPE)
@@ -330,7 +326,7 @@ class HetznerState(MachineState):
             stream = subprocess.Popen(
                 ["gzip", "-c"], stdin=tarstream.stdout, stdout=subprocess.PIPE
             )
-            self.run_command("gzip -d | ({0})".format(recv), stdin=stream.stdout)
+            self.run_command(f"gzip -d | ({recv})", stdin=stream.stdout)
             stream.wait()
         else:
             self.run_command(recv, stdin=tarstream.stdout)
@@ -373,9 +369,9 @@ class HetznerState(MachineState):
 
         self.log_start("bind-mounting special filesystems... ")
         for mountpoint in ("/proc", "/dev", "/dev/shm", "/sys"):
-            self.log_continue("{0}...".format(mountpoint))
-            cmd = "mkdir -m 0755 -p /mnt{0} && ".format(mountpoint)
-            cmd += "mount --bind {0} /mnt{0}".format(mountpoint)
+            self.log_continue(f"{mountpoint}...")
+            cmd = f"mkdir -m 0755 -p /mnt{mountpoint} && "
+            cmd += f"mount --bind {mountpoint} /mnt{mountpoint}"
             self.run_command(cmd)
         self.log_end("done.")
 
@@ -403,9 +399,7 @@ class HetznerState(MachineState):
         something nasty).
         """
         self.log(
-            "rebooting machine ‘{0}’ ({1}) into rescue system".format(
-                self.name, self.main_ipv4
-            )
+            f"rebooting machine ‘{self.name}’ ({self.main_ipv4}) into rescue system"
         )
         server = self._get_server_by_ip(self.main_ipv4)
         server.rescue.activate()
@@ -443,18 +437,18 @@ class HetznerState(MachineState):
             "nix/var/log/nix/drvs",
         ]
         to_create = " ".join(map(lambda d: os.path.join("/mnt", d), mntdirs))
-        cmds.append("mkdir -m 0755 -p {0}".format(to_create))
+        cmds.append(f"mkdir -m 0755 -p {to_create}")
         self.run_command(" && ".join(cmds))
         self.log_end("done.")
 
         self.log_start("bind-mounting files in /etc... ")
         for etcfile in ("resolv.conf", "passwd", "group"):
-            self.log_continue("{0}...".format(etcfile))
+            self.log_continue(f"{etcfile}...")
             cmd = (
-                "if ! test -e /mnt/etc/{0}; then"
-                " touch /mnt/etc/{0} && mount --bind /etc/{0} /mnt/etc/{0};"
+                f"if ! test -e /mnt/etc/{etcfile}; then"
+                f" touch /mnt/etc/{etcfile} && mount --bind /etc/{etcfile} /mnt/etc/{etcfile};"
                 " fi"
-            ).format(etcfile)
+            )
             self.run_command(cmd)
         self.log_end("done.")
 
@@ -462,7 +456,7 @@ class HetznerState(MachineState):
         self.run_command("activate-remote")
 
         self.main_ssh_private_key, self.main_ssh_public_key = create_key_pair(
-            key_name="NixOps client key of {0}".format(self.name)
+            key_name=f"NixOps client key of {self.name}"
         )
         self._gen_network_spec()
 
@@ -517,24 +511,22 @@ class HetznerState(MachineState):
         Get lines suitable for services.udev.extraRules for 'interface',
         and thus essentially map the device name to a hardware address.
         """
-        cmd = "ip addr show \"{0}\" | sed -n -e 's|^.*link/ether  *||p'"
+        cmd = f"ip addr show \"{interface}\" | sed -n -e 's|^.*link/ether  *||p'"
         cmd += " | cut -d' ' -f1"
-        mac_addr = self.run_command(cmd.format(interface), capture_stdout=True).strip()
+        mac_addr = self.run_command(cmd, capture_stdout=True).strip()
 
-        rule = 'ACTION=="add", SUBSYSTEM=="net", ATTR{{address}}=="{0}", '
-        rule += 'NAME="{1}"'
-        return rule.format(mac_addr, interface)
+        rule = f'ACTION=="add", SUBSYSTEM=="net", ATTR{{address}}=="{mac_addr}", '
+        rule += f'NAME="{interface}"'
+        return rule
 
     def _get_ipv4_addr_and_prefix_for(self, interface):
         """
         Return a tuple of (ipv4_address, prefix_length) for the specified
         interface.
         """
-        cmd = "ip addr show \"{0}\" | sed -n -e 's/^.*inet  *//p'"
+        cmd = f"ip addr show \"{interface}\" | sed -n -e 's/^.*inet  *//p'"
         cmd += " | cut -d' ' -f1"
-        ipv4_addr_prefix = self.run_command(
-            cmd.format(interface), capture_stdout=True
-        ).strip()
+        ipv4_addr_prefix = self.run_command(cmd, capture_stdout=True).strip()
         if "/" not in ipv4_addr_prefix:
             # No IP address set for this interface.
             return None
@@ -694,7 +686,7 @@ class HetznerState(MachineState):
             if not self.robot_admin_user or not self.robot_admin_pass:
                 self.log_start(
                     "creating an exclusive robot admin sub-account "
-                    "for ‘{0}’... ".format(self.name)
+                    f"for ‘{self.name}’... "
                 )
                 server = self._get_server_from_main_robot(self.main_ipv4, defn)
                 with self.depl._db:
@@ -702,7 +694,7 @@ class HetznerState(MachineState):
                         self.robot_admin_user,
                         self.robot_admin_pass,
                     ) = server.admin.create()
-                self.log_end("done. ({0})".format(self.robot_admin_user))
+                self.log_end(f"done. ({self.robot_admin_user})")
         else:
             # If available, assign user and password even if they are already
             # in the DB, so that changes to them are immediately reflected.
@@ -728,7 +720,7 @@ class HetznerState(MachineState):
             self._install_base_system()
             self._detect_hardware()
             server = self._get_server_by_ip(self.main_ipv4)
-            vm_id = "nixops-{0}-{1}".format(self.depl.uuid, self.name)
+            vm_id = f"nixops-{self.depl.uuid}-{self.name}"
             server.set_name(vm_id[:100])
             self.vm_id = vm_id
             known_hosts.remove(self.main_ipv4, None)
@@ -758,7 +750,10 @@ class HetznerState(MachineState):
         Wait for the system to shutdown and set state STOPPED afterwards.
         """
         self.log_start("waiting for system to shutdown... ")
-        dotlog = lambda: self.log_continue(".")  # NOQA
+
+        def dotlog():
+            self.log_continue(".")  # NOQA
+
         wait_for_tcp_port(self.main_ipv4, 22, open=False, callback=dotlog)
         self.log_continue("[down]")
 
@@ -831,7 +826,7 @@ class HetznerState(MachineState):
         self.log_start("removing admin account... ")
         server.admin.delete()
         self.log_start("done.")
-        self.log("machine left in rescue, password: " "{0}".format(self.rescue_passwd))
+        self.log(f"machine left in rescue, password: " "{self.rescue_paswd}")
         return True
 
     def destroy(self, wipe=False):
@@ -842,12 +837,12 @@ class HetznerState(MachineState):
         # needed credentials, we can avoid to ask for confirmation.
         server = self._get_server_from_main_robot(self.main_ipv4)
 
+        question_target = f"Hetzner machine ‘{self.name}’"
         if wipe:
-            question = "are you sure you want to completely erase {0}?"
+            question = f"are you sure you want to completely erase {question_target}?"
         else:
-            question = "are you sure you want to destroy {0}?"
-        question_target = "Hetzner machine ‘{0}’".format(self.name)
-        if not self.depl.logger.confirm(question.format(question_target)):
+            question = f"are you sure you want to destroy {question_target}?"
+        if not self.depl.logger.confirm(question):
             return False
 
         return self._destroy(server, wipe)
