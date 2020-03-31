@@ -1,0 +1,21 @@
+on:
+  - push
+  - pull_request
+jobs:
+  test:
+    name: "build:${{ matrix.os }}:${{ matrix.cmd }}"
+    env:
+      NIX_PATH: "nixpkgs=channel:nixos-unstable"
+
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, macos-latest]
+        cmd:
+          - nix-shell --command "python tests.py"
+          - nix-shell --command "black --diff --check ."
+          - nix-build default.nix
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@722adc63f1aa60a57ec37892e133b1d319cae598
+      - uses: cachix/install-nix-action@ebed63b0a20f20951a06a507ea1a1596bfce35b6
+      - run: ${{ matrix.cmd }}
