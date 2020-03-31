@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "nixopshetzner"
+version = "1.0"
+description = "NixOps plugin for NeatCloud"
+authors = ["NixOS contributors"]
+license = "MIT"
+include = [ "nix/*.nix" ]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+nixops = { git = "https://github.com/adisbladis/nixops.git", rev = "poetry2nix-plugins" }
+hetzner = "0.8.2"
+
+[tool.poetry.dev-dependencies]
+
+[tool.poetry.plugins."nixops"]
+nixopshetzner = "nixopshetzner.plugin"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
