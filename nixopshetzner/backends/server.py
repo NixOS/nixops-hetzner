@@ -5,6 +5,7 @@ import os
 import socket
 import struct
 import subprocess
+from typing import Optional
 
 from hetzner.robot import Robot
 
@@ -97,14 +98,14 @@ class HetznerState(MachineState):
         self._robot = None
 
     @property
-    def resource_id(self):
+    def resource_id(self) -> Optional[str]:
         return self.vm_id
 
     @property
-    def public_ipv4(self):
+    def public_ipv4(self) -> Optional[str]:
         return self.main_ipv4
 
-    def connect(self):
+    def connect(self) -> Robot:
         """
         Connect to the Hetzner robot by using the admin credetials in
         'self.robot_admin_user' and 'self.robot_admin_pass'.
@@ -115,7 +116,12 @@ class HetznerState(MachineState):
         self._robot = Robot(self.robot_admin_user, self.robot_admin_pass)
         return self._robot
 
-    def _get_robot_user_and_pass(self, defn=None, default_user=None, default_pass=None):
+    def _get_robot_user_and_pass(
+        self,
+        defn: Optional[HetznerDefinition] = None,
+        default_user=None,
+        default_pass=None,
+    ):
         """
         Fetch the server instance using the main robot user and passwords
         from the MachineDefinition passed by 'defn'. If the definition does not
@@ -206,7 +212,10 @@ class HetznerState(MachineState):
             # so only wait for the reboot to finish when deploying real
             # systems.
             self.log_start("waiting for rescue system...")
-            dotlog = lambda: self.log_continue(".")  # NOQA
+
+            def dotlog():
+                self.log_continue(".")
+
             wait_for_tcp_port(ip, 22, open=False, callback=dotlog)
             self.log_continue("[down]")
             wait_for_tcp_port(ip, 22, callback=dotlog)
@@ -247,7 +256,7 @@ class HetznerState(MachineState):
         self.run_command("cat >> /etc/motd", stdin_string=fullmsg)
         self.log_end("done.")
 
-    def _bootstrap_rescue(self, install, partitions):
+    def _bootstrap_rescue(self, install: bool, partitions):
         """
         Bootstrap everything needed in order to get Nix and the partitioner
         usable in the rescue system. The keyword arguments are only for
@@ -370,7 +379,7 @@ class HetznerState(MachineState):
             self.run_command(cmd)
         self.log_end("done.")
 
-    def reboot(self, hard=False):
+    def reboot(self, hard: bool = False):
         if hard:
             self.log_start("sending hard reset to robot... ")
             server = self._get_server_by_ip(self.main_ipv4)
@@ -381,7 +390,9 @@ class HetznerState(MachineState):
         else:
             MachineState.reboot(self, hard=hard)
 
-    def reboot_rescue(self, install=False, partitions=None, bootstrap=True, hard=False):
+    def reboot_rescue(
+        self, install=False, partitions=None, bootstrap: bool = True, hard: bool = False
+    ) -> None:
         """
         Use the Robot to activate the rescue system and reboot the system. By
         default, only mount partitions and do not partition or wipe anything.
@@ -664,7 +675,13 @@ class HetznerState(MachineState):
         else:
             return {}
 
-    def create(self, defn, check, allow_reboot, allow_recreate):
+    def create(
+        self,
+        defn: HetznerDefinition,
+        check: bool,
+        allow_reboot: bool,
+        allow_recreate: bool,
+    ):
         assert isinstance(defn, HetznerDefinition)
 
         if self.state not in (self.RESCUE, self.UP) or check:
