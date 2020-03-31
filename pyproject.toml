@@ -13,6 +13,7 @@ hetzner = "0.8.2"
 
 [tool.poetry.dev-dependencies]
 nose = "^1"
+black = "19.10b0"
 
 [tool.poetry.plugins."nixops"]
 nixopshetzner = "nixopshetzner.plugin"
