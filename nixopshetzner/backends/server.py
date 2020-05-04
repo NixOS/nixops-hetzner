@@ -11,7 +11,7 @@ from hetzner.robot import Robot
 
 from nixops import known_hosts
 from nixops.util import wait_for_tcp_port, ping_tcp_port
-from nixops.util import attr_property, create_key_pair, xml_expr_to_python
+from nixops.util import attr_property, create_key_pair
 from nixops.ssh_util import SSHCommandFailed
 from nixops.backends import MachineDefinition, MachineState
 from nixops.nix_expr import nix2py
@@ -53,19 +53,12 @@ class HetznerDefinition(MachineDefinition):
         return "hetzner"
 
     def __init__(self, xml, config):
-        MachineDefinition.__init__(self, xml, config)
-        x = xml.find("attrs/attr[@name='hetzner']/attrs")
-        assert x is not None
-        attrs = [
-            ("main_ipv4", "mainIPv4", "string"),
-            ("create_sub_account", "createSubAccount", "bool"),
-            ("robot_user", "robotUser", "string"),
-            ("robot_pass", "robotPass", "string"),
-            ("partitions", "partitions", "string"),
-        ]
-        for var, name, valtype in attrs:
-            node = x.find("attr[@name='" + name + "']/" + valtype)
-            setattr(self, var, xml_expr_to_python(node))
+        super().__init__(name,config)
+        self.main_ipv4 = config["mainIPv4"]
+        self.create_sub_account = config["createSubAccount"]
+        self.robot_user = config["robotUser"]
+        self.robot_pass = config["robotPass"]
+        self.partitions = config["partitions"]
 
 
 class HetznerState(MachineState):
