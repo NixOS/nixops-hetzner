@@ -1,7 +1,5 @@
-{ nixpkgs ? <nixpkgs> }:
+{ pkgs ? import <nixpkgs> {} }:
 let
-  overlays = import ./overlays.nix;
-  pkgs = import nixpkgs { inherit overlays; };
   overrides = import ./overrides.nix { inherit pkgs; };
 in
 pkgs.mkShell {
