@@ -11,7 +11,6 @@ class NixopsHetznerPlugin(Plugin):
     @staticmethod
     def load():
         return [
-            "nixops_hetzner.resources",
             "nixops_hetzner.backends.server",
         ]
 

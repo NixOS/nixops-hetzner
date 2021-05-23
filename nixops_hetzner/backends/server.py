@@ -5,15 +5,28 @@ import os
 import socket
 import struct
 import subprocess
+from typing import Optional
 
 from hetzner.robot import Robot
 
 from nixops import known_hosts
-from nixops.util import wait_for_tcp_port, ping_tcp_port
-from nixops.util import attr_property, create_key_pair, xml_expr_to_python
+from nixops_hetzner.hetzner_utils import (
+    wait_for_tcp_port,
+    ping_tcp_port,
+)
+from nixops.util import (
+    attr_property,
+    create_key_pair,
+)
 from nixops.ssh_util import SSHCommandFailed
-from nixops.backends import MachineDefinition, MachineState
+from nixops.backends import (
+    MachineDefinition,
+    MachineState,
+    MachineOptions,
+)
 from nixops.nix_expr import nix2py
+
+from .options import HetznerOptions
 
 # This is set to True by tests/hetzner-backend.nix. If it's in effect, no
 # attempt is made to connect to the real Robot API and the API calls only
@@ -42,29 +55,28 @@ class TestModeServer(object):
         password = "abcd1234"
 
 
+class HetznerMachineOptions(MachineOptions):
+    hetzner: HetznerOptions
+
+
 class HetznerDefinition(MachineDefinition):
     """
     Definition of a Hetzner machine.
     """
 
+    config: HetznerMachineOptions
+
     @classmethod
     def get_type(cls):
         return "hetzner"
 
-    def __init__(self, xml, config):
-        MachineDefinition.__init__(self, xml, config)
-        x = xml.find("attrs/attr[@name='hetzner']/attrs")
-        assert x is not None
-        attrs = [
-            ("main_ipv4", "mainIPv4", "string"),
-            ("create_sub_account", "createSubAccount", "bool"),
-            ("robot_user", "robotUser", "string"),
-            ("robot_pass", "robotPass", "string"),
-            ("partitions", "partitions", "string"),
-        ]
-        for var, name, valtype in attrs:
-            node = x.find("attr[@name='" + name + "']/" + valtype)
-            setattr(self, var, xml_expr_to_python(node))
+    def __init__(self, name, config):
+        super().__init__(name, config)
+        self.main_ipv4 = self.config.mainIPv4
+        self.create_sub_account = self.config.createSubAccount
+        self.robot_user = self.config.robotUser
+        self.robot_pass = self.config.robotPass
+        self.partitions = self.config.partitions
 
 
 class HetznerState(MachineState):
@@ -97,14 +109,14 @@ class HetznerState(MachineState):
         self._robot = None
 
     @property
-    def resource_id(self):
+    def resource_id(self) -> Optional[str]:
         return self.vm_id
 
     @property
-    def public_ipv4(self):
+    def public_ipv4(self) -> Optional[str]:
         return self.main_ipv4
 
-    def connect(self):
+    def connect(self) -> Robot:
         """
         Connect to the Hetzner robot by using the admin credetials in
         'self.robot_admin_user' and 'self.robot_admin_pass'.

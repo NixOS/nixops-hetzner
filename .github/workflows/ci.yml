@@ -38,6 +38,17 @@ jobs:
         run: 'nix-shell ./shell.nix --run "mypy nixops_hetzner"'
         env:
           NIX_PATH: "nixpkgs=channel:nixos-20.09"
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.3.4
+      - name: Nix
+        uses: cachix/install-nix-action@v13
+      - name: CoverageTests
+        run: 'nix-shell ./shell.nix --run "python tests.py"'
+        env:
+          NIX_PATH: "nixpkgs=channel:nixos-20.09"
   build:
     runs-on: ubuntu-latest
     steps:
