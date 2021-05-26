@@ -18,7 +18,7 @@ This repo contains the NixOps Hetzner Plugin.
 
 To start developing on the NixOps Hetzner plugin, you can run:
 ```bash
-  $ nix-shell
+  $ nix-shell -I channel:nixos-20.09 -p poetry
   $ poetry install
   $ poetry shell
 ```

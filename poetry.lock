@@ -31,7 +31,7 @@ python2 = ["typed-ast (>=1.4.2)"]
 
 [[package]]
 name = "click"
-version = "8.0.0"
+version = "8.0.1"
 description = "Composable command line interface toolkit"
 category = "dev"
 optional = false
@@ -39,6 +39,7 @@ python-versions = ">=3.6"
 
 [package.dependencies]
 colorama = {version = "*", markers = "platform_system == \"Windows\""}
+importlib-metadata = {version = "*", markers = "python_version < \"3.8\""}
 
 [[package]]
 name = "colorama"
@@ -58,7 +59,7 @@ python-versions = "*"
 
 [[package]]
 name = "importlib-metadata"
-version = "4.0.1"
+version = "4.2.0"
 description = "Read metadata from Python packages"
 category = "main"
 optional = false
@@ -116,6 +117,24 @@ type = "git"
 url = "https://github.com/NixOS/nixops.git"
 reference = "master"
 resolved_reference = "45256745cef246dabe1ae8a7d109988f190cd7ef"
+
+[[package]]
+name = "nixos-modules-contrib"
+version = "0.1.0"
+description = "NixOS modules that don't quite belong in NixOS."
+category = "main"
+optional = false
+python-versions = "^3.7"
+develop = false
+
+[package.dependencies]
+nixops = "rev master"
+
+[package.source]
+type = "git"
+url = "https://github.com/nix-community/nixos-modules-contrib.git"
+reference = "master"
+resolved_reference = "81a1c2ef424dcf596a97b2e46a58ca73a1dd1ff8"
 
 [[package]]
 name = "nose"
@@ -214,7 +233,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=1.2.3)", "pytest-flake8", "pyt
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "43ca9afb967804370d755f70ce56692ba18c9a627e0215db6ef19bbf86c823bc"
+content-hash = "763e2db930c90c90cde8d545fefd5f5a29b0c59a6a81e3c5b56d64b7387ec88f"
 
 [metadata.files]
 appdirs = [
@@ -226,8 +245,8 @@ black = [
     {file = "black-21.5b1.tar.gz", hash = "sha256:23695358dbcb3deafe7f0a3ad89feee5999a46be5fec21f4f1d108be0bcdb3b1"},
 ]
 click = [
-    {file = "click-8.0.0-py3-none-any.whl", hash = "sha256:e90e62ced43dc8105fb9a26d62f0d9340b5c8db053a814e25d95c19873ae87db"},
-    {file = "click-8.0.0.tar.gz", hash = "sha256:7d8c289ee437bcb0316820ccee14aefcb056e58d31830ecab8e47eda6540e136"},
+    {file = "click-8.0.1-py3-none-any.whl", hash = "sha256:fba402a4a47334742d782209a7c79bc448911afe1149d07bdabdf480b3e2f4b6"},
+    {file = "click-8.0.1.tar.gz", hash = "sha256:8c04c11192119b1ef78ea049e0a6f0463e4c48ef00a30160c704337586f3ad7a"},
 ]
 colorama = [
     {file = "colorama-0.4.4-py2.py3-none-any.whl", hash = "sha256:9f47eda37229f68eee03b24b9748937c7dc3868f906e8ba69fbcbdd3bc5dc3e2"},
@@ -237,8 +256,8 @@ hetzner = [
     {file = "hetzner-0.8.3.tar.gz", hash = "sha256:9a43dbbeb4a1f3efc86c5fe1c1d7039aaa635dfdb829506ec3aa34382d3a7114"},
 ]
 importlib-metadata = [
-    {file = "importlib_metadata-4.0.1-py3-none-any.whl", hash = "sha256:d7eb1dea6d6a6086f8be21784cc9e3bcfa55872b52309bc5fad53a8ea444465d"},
-    {file = "importlib_metadata-4.0.1.tar.gz", hash = "sha256:8c501196e49fb9df5df43833bdb1e4328f64847763ec8a50703148b73784d581"},
+    {file = "importlib_metadata-4.2.0-py3-none-any.whl", hash = "sha256:057e92c15bc8d9e8109738a48db0ccb31b4d9d5cfbee5a8670879a30be66304b"},
+    {file = "importlib_metadata-4.2.0.tar.gz", hash = "sha256:b7e52a1f8dec14a75ea73e0891f3060099ca1d8e6a462a4dff11c3e119ea1b31"},
 ]
 mypy = [
     {file = "mypy-0.812-cp35-cp35m-macosx_10_9_x86_64.whl", hash = "sha256:a26f8ec704e5a7423c8824d425086705e381b4f1dfdef6e3a1edab7ba174ec49"},
@@ -269,6 +288,7 @@ mypy-extensions = [
     {file = "mypy_extensions-0.4.3.tar.gz", hash = "sha256:2d82818f5bb3e369420cb3c4060a7970edba416647068eb4c5343488a6c604a8"},
 ]
 nixops = []
+nixos-modules-contrib = []
 nose = [
     {file = "nose-1.3.7-py2-none-any.whl", hash = "sha256:dadcddc0aefbf99eea214e0f1232b94f2fa9bd98fa8353711dacb112bfcbbb2a"},
     {file = "nose-1.3.7-py3-none-any.whl", hash = "sha256:9ff7c6cc443f8c51994b34a667bbcf45afd6d945be7477b52e97516fd17c53ac"},

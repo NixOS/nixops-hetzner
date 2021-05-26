@@ -72,11 +72,11 @@ class HetznerDefinition(MachineDefinition):
 
     def __init__(self, name, config):
         super().__init__(name, config)
-        self.main_ipv4 = self.config.mainIPv4
-        self.create_sub_account = self.config.createSubAccount
-        self.robot_user = self.config.robotUser
-        self.robot_pass = self.config.robotPass
-        self.partitions = self.config.partitions
+        self.main_ipv4 = self.config.hetzner.mainIPv4
+        self.create_sub_account = self.config.hetzner.createSubAccount
+        self.robot_user = self.config.hetzner.robotUser
+        self.robot_pass = self.config.hetzner.robotPass
+        self.partitions = self.config.hetzner.partitions
 
 
 class HetznerState(MachineState):
