@@ -669,9 +669,9 @@ class HetznerState(MachineState):
     def get_physical_spec(self):
         if all([self.net_info, self.fs_info, self.hw_info, self.main_ssh_public_key]):
             return {
-                "config": dict(
-                    self.net_info.items()
-                    + {
+                "config": {
+                    **self.net_info,
+                    **{
                         (
                             "users",
                             "extraUsers",
@@ -680,8 +680,8 @@ class HetznerState(MachineState):
                             "authorizedKeys",
                             "keys",
                         ): [self.main_ssh_public_key]
-                    }.items()
-                ),
+                    },
+                },
                 "imports": [nix2py(self.fs_info), nix2py(self.hw_info)],
             }
         else:
