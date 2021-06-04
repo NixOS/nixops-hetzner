@@ -269,12 +269,12 @@ class HetznerState(MachineState):
         self.log_start("building Nix bootstrap installer... ")
         expr = os.path.realpath(
             os.path.dirname(__file__)
-            + "../../../../../../share/nix/nixops-hetzner/hetzner-bootstrap.nix"
+            + "/../nix/hetzner-bootstrap.nix"
         )
         bootstrap_out = subprocess.check_output(
             ["nix-build", expr, "--no-out-link"]
         ).rstrip()
-        bootstrap = os.path.join(bootstrap_out, "bin/hetzner-bootstrap")
+        bootstrap = os.path.join(bootstrap_out.decode("utf-8"), "bin/hetzner-bootstrap")
         self.log_end("done. ({0})".format(bootstrap))
 
         self.log_start("creating nixbld group in rescue system... ")
