@@ -12,14 +12,24 @@ This repo contains the NixOps Hetzner Plugin.
 * [Issue Tracker](https://github.com/NixOS/nixops/issues)
 * [Mailing list / Google group](https://groups.google.com/forum/#!forum/nixops-users)
 * [IRC - #nixos on freenode.net](irc://irc.freenode.net/#nixos)
+* [Documentation](https://nixops.readthedocs.io/en/latest)
 
 ## Developing
 
 To start developing on the NixOps Hetzner plugin, you can run:
+```bash
+  $ nix-shell -I channel:nixos-20.09 -p poetry
+  $ poetry install
+  $ poetry shell
+```
+To view active plugins:
 
 ```bash
-  $ ./dev-shell
+nixops list-plugins
 ```
+and you're ready to go.
+
+The code should conform to style guide and types annotation standards so please make sure to run `black` and `mypy`.
 
 ## Building from source
 

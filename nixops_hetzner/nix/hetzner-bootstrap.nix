@@ -1,4 +1,4 @@
-with import <nixpkgs> { system = "x86_64-linux"; };
+with import <nixpkgs> { system = "x86_64-linux"; config.allowBroken = true; };
 
 let
   pkgsNative = import <nixpkgs> {};

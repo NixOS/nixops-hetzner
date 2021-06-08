@@ -4,8 +4,19 @@ coverage.xml
 examples/*.json
 examples/*.lock
 html/
-*.pyc
 result
 *.sw[a-z]
 tags
 tests/test.nixops*
+.mypy_cache
+
+syntax: glob
+.idea
+*egg-info
+*.log
+*.txt
+*.pyc
+*.csv
+*.out
+*.tar
+*.bkp
