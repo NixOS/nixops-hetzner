@@ -403,28 +403,31 @@ class HetznerState(MachineState):
         self.partitions if available (which it shouldn't if you're not doing
         something nasty).
         """
-        self.log(
-            "rebooting machine ‘{0}’ ({1}) into rescue system".format(
-                self.name, self.main_ipv4
-            )
-        )
-        server = self._get_server_by_ip(self.main_ipv4)
-        server.rescue.activate()
-        rescue_passwd = server.rescue.password
-        if hard or (install and self.state not in (self.UP, self.RESCUE)):
-            self.log_start("sending hard reset to robot... ")
-            server.reboot("hard")
+        if self.RESCUE:
+            self.log("machine already in rescue mode..")
         else:
-            self.log_start("sending reboot command... ")
-            if self.state == self.RESCUE:
-                self.run_command("(sleep 2; reboot) &", check=False)
+            self.log(
+                "rebooting machine ‘{0}’ ({1}) into rescue system".format(
+                    self.name, self.main_ipv4
+                )
+            )
+            server = self._get_server_by_ip(self.main_ipv4)
+            server.rescue.activate()
+            rescue_passwd = server.rescue.password
+            if hard or (install and self.state not in (self.UP, self.RESCUE)):
+                self.log_start("sending hard reset to robot... ")
+                server.reboot("hard")
             else:
-                self.run_command("systemctl reboot", check=False)
-        self.log_end("done.")
-        self._wait_for_rescue(self.main_ipv4)
-        self.rescue_passwd = rescue_passwd
-        self.state = self.RESCUE
-        self.ssh.reset()
+                self.log_start("sending reboot command... ")
+                if self.state == self.RESCUE:
+                    self.run_command("(sleep 2; reboot) &", check=False)
+                else:
+                    self.run_command("systemctl reboot", check=False)
+            self.log_end("done.")
+            self._wait_for_rescue(self.main_ipv4)
+            self.rescue_passwd = rescue_passwd
+            self.state = self.RESCUE
+            self.ssh.reset()
         if bootstrap:
             self._bootstrap_rescue(install, partitions)
 
@@ -739,7 +742,7 @@ class HetznerState(MachineState):
             self.vm_id = vm_id
             known_hosts.remove(self.main_ipv4, None)
             self.just_installed = True
-            self.state_version = defn.config["nixosRelease"]
+            self.state_version = defn.config.nixosRelease
 
     def start(self):
         """
