@@ -11,7 +11,7 @@ This repo contains the NixOps Hetzner Plugin.
 * [Source code](https://github.com/NixOS/nixops)
 * [Issue Tracker](https://github.com/NixOS/nixops/issues)
 * [Mailing list / Google group](https://groups.google.com/forum/#!forum/nixops-users)
-* [IRC - #nixos on freenode.net](irc://irc.freenode.net/#nixos)
+* [Matrix - #nix:nixos.org](https://matrix.to/#/#nix:nixos.org)
 * [Documentation](https://nixops.readthedocs.io/en/latest)
 
 ## Developing
