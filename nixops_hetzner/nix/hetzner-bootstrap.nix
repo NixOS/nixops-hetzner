@@ -142,7 +142,7 @@ in stdenv.mkDerivation {
                        (remember, we're on a non-NixOS system here), together
                        with the partitioner.
     '';
-    platforms = stdenv.lib.platforms.all;
-    maintainers = [ stdenv.lib.maintainers.aszlig ];
+    platforms = lib.platforms.all;
+    maintainers = [ lib.maintainers.aszlig ];
   };
 }
